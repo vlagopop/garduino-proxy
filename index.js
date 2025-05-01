@@ -1,16 +1,25 @@
-const express = require("express");
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+import express from 'express';
+import fetch from 'node-fetch';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get("/proxy", async (req, res) => {
+app.use(express.json());
+
+app.get('/', (req, res) => {
+  res.send('Proxy server is running.');
+});
+
+app.get('/proxy', async (req, res) => {
+  const googleScriptURL = 'https://script.google.com/macros/s/AKfycbxEW-Ftbwuct6LpjrLxr_KMzQdGBZ6ZXH9CjpwZEJNVf6_lc0PMG7f1UxVsfdh-B_Kc/exec?value1=123&value2=456';
+
   try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbxEW-Ftbwuct6LpjrLxr_KMzQdGBZ6ZXH9CjpwZEJNVf6_lc0PMG7f1UxVsfdh-B_Kc/exec?value1=123&value2=456");
-    const text = await response.text();
-    res.send({ status: "ok", google_response: text });
-  } catch (err) {
-    res.status(500).send({ status: "error", message: err.toString() });
+    const response = await fetch(googleScriptURL);
+    const data = await response.text(); // or .json() if it's JSON
+    res.send(data);
+  } catch (error) {
+    console.error('Fetch error:', error);
+    res.status(500).send('Error contacting Google Script.');
   }
 });
 
